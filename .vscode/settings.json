@@ -1,0 +1,5 @@
+{
+    "git.ignoreLimitWarning": true,
+    "solidity.compileUsingLocalVersion": "/Users/Francois/code/Alyra/DApp/NFTmarketplaceSvelte/soljson-v0.8.13+commit.abaa5c0e.js",
+    "solidity.compileUsingRemoteVersion": "v0.8.13+commit.abaa5c0e"
+}
