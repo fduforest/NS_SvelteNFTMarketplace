@@ -20,7 +20,7 @@ contract NFTCollection is Initializable, ERC721URIStorageUpgradeable {
         address tokenAddress; /// son adresse
         uint256 price; /// Prix
         bool favorite; /// Favoris oui ou non
-        bool Auctionable; /// Enchères
+     
     }
     NFT[] collection; //Array NFT name Collection
 
@@ -43,7 +43,6 @@ contract NFTCollection is Initializable, ERC721URIStorageUpgradeable {
      * @param _tokenAddress address du token
      * @param _price NFT price
      * @param _favorite NFT favorite
-     * @param _auctionable NFT auctioned
      * @return newItemId New id of the item that has been minted
      */
 
@@ -56,7 +55,6 @@ contract NFTCollection is Initializable, ERC721URIStorageUpgradeable {
         address _tokenAddress,
         uint256 _price,
         bool _favorite,
-        bool _auctionable
     ) public returns (uint256) {
         _tokenIds.increment();
         collection.push(
@@ -67,7 +65,6 @@ contract NFTCollection is Initializable, ERC721URIStorageUpgradeable {
                 _tokenAddress,
                 _price,
                 _favorite,
-                _auctionable
             )
         );
         uint256 newItemId = _tokenIds.current();
