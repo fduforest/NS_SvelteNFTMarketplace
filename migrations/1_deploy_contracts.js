@@ -1,7 +1,5 @@
-// Import du smart contract "SimpleStorage"
-const Voting = artifacts.require("Voting")
+var NFTCollectionFactory = artifacts.require("./NFTCollectionFactory.sol")
 
-module.exports = (deployer) => {
-  // Deployer le smart contract!
-  deployer.deploy(Voting)
+module.exports = function (deployer) {
+  deployer.deploy(NFTCollectionFactory)
 }
