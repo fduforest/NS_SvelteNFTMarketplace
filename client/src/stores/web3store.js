@@ -1,20 +1,82 @@
 import { writable } from 'svelte/store';
-// import {
-// 	defaultEvmStores,
-// 	makeContractStore,
-// 	connected,
-// 	web3,
-// 	selectedAccount,
-// 	chainId,
-// 	chainData
-// } from 'svelte-web3';
-//import NFTmarketplace from '../../../build/contracts/NFTmarketplace.json';
+import axios from 'axios';
 import NFTCollectionFactory from '../../../build/contracts/NFTCollectionFactory.json';
 import NFTCollection from '../../../build/contracts/NFTCollection.json';
-
-const networkId = null;
-let NFTCollectionFactoryContract = null;
 export let selectedAccountCollections = writable([]);
+// export let web3 = writable([]);
+// export let NFTCollectionFactoryContract = writable([]);
+// export let accounts = writable([]);
+// export let account = writable([]);
+const etherscanAPI = 'https://api-ropsten.etherscan.io/api';
+const etherscanAPIKey = '6RFWHQUD1QJ2YP74ZCWBAW8HRH6G3EMK1Z';
+export let web3 = null;
+export let NFTCollectionFactoryContract = null;
+export let accounts = null;
+export let account = null;
+const ipfsGateway = 'https://gateway.pinata.cloud/ipfs/' || 'https://ipfs.io/ipfs/';
+
+try {
+	web3 = new Web3(window.ethereum);
+	accounts = await web3.eth.getAccounts();
+	account = accounts[0];
+	const networkId = await web3.eth.net.getId();
+	console.log('networkId', networkId);
+	const deployedNetwork = await NFTCollectionFactory.networks[networkId];
+	if (deployedNetwork) {
+		NFTCollectionFactoryContract = await new web3.eth.Contract(
+			NFTCollectionFactory.abi,
+			deployedNetwork && deployedNetwork.address
+		);
+	} else {
+		window.alert('Smart contract not deployed to detected network.');
+	}
+} catch (err) {
+	console.error(err);
+}
+
+export const getOwnedNFTs = async () => {
+	try {
+		const res = await axios.get(etherscanAPI, {
+			params: { module: 'account', action: 'tokennfttx', address: account, apikey: etherscanAPIKey }
+		});
+		let collections = [];
+		let contractAdresses = [];
+		for (let i = 0; i < res.data.result.length; i++) {
+			let NFTCollectionAddress = res.data.result[i].contractAddress;
+			let NFTCollectionName = res.data.result[i].tokenName;
+			let tokenID = res.data.result[i].tokenID;
+			let contract = await new web3.eth.Contract(NFTCollection.abi, NFTCollectionAddress);
+			let tokenURI = await contract.methods.tokenURI(tokenID).call({ from: account });
+			let metadataURI = await fetch(ipfsGateway + tokenURI);
+			let metadataJSON = await metadataURI.json();
+			let nft = {
+				image: metadataJSON.image,
+				name: metadataJSON.name,
+				description: metadataJSON.description
+			};
+			if (contractAdresses.indexOf(NFTCollectionAddress) == -1) {
+				contractAdresses = [...contractAdresses, NFTCollectionAddress];
+				let collection = {
+					name: NFTCollectionName,
+					address: NFTCollectionAddress,
+					nfts: []
+				};
+				console.log('NFTCollectionName NF', NFTCollectionName);
+				collection.nfts = [...collection.nfts, nft];
+				collections = [...collections, collection];
+			} else {
+				const foundIndex = contractAdresses.indexOf(NFTCollectionAddress);
+				console.log('NFTCollectionName FI', NFTCollectionName);
+				collections[foundIndex].nfts = [...collections[foundIndex].nfts, nft];
+			}
+			console.log(collections);
+		}
+	} catch (err) {
+		console.error(err);
+	}
+};
+
+getOwnedNFTs();
 
 export const getSelectedAccountCollections = async () => {
 	console.log('getCollections');

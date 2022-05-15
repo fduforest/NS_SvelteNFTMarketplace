@@ -1,6 +1,6 @@
 <script context="module">
 	import { browser, dev } from '$app/env';
-	import Premint from '../lib/components/forms/CreateForm.svelte';
+	import CreateForm from '../lib/components/forms/CreateForm.svelte';
 </script>
 
 <svelte:head>
