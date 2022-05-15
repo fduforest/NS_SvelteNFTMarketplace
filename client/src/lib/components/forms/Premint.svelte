@@ -11,20 +11,31 @@
 	import { browser } from '$app/env';
 	import NFTmarketplace from '../../../../../build/contracts/NFTmarketplace';
 	import { connected, web3, selectedAccount, chainId, chainData } from 'svelte-web3';
-	import { mint } from '../../../stores/web3store.js';
+	import { mint, createCollection, selectedAccountCollections } from '../../../stores/web3store.js';
 	//import uploadToIPFS from '../../utils/pinata';
 	let values;
 	let files;
 	let file;
 	let media;
+	//let reader;
+	//let selectedAccountCollections = [];
 
 	const api_endpoint = 'http://127.0.0.1:3005/upload';
-	const reader = new FileReader();
+	// onMount(() => {
+	// 	const reader = new FileReader();
+	// 	//events = getSelectedAccountCollections();
+	// });
 
+	// if (typeof window !== 'undefined') {
+	// 	reader = new FileReader();
+	// }
+	//const reader = new FileReader();
 	// console.log(account);
 
-	async function createCollection(e) {
-		mint('MoonR', 'Moon');
+	async function handleCreateCollection(e) {
+		console.log('values.collectionName', values.collectionName);
+		console.log('values.collectionSymbol', values.collectionSymbol);
+		createCollection(values.collectionName, values.collectionSymbol);
 	}
 
 	async function handleClick(e) {
@@ -37,19 +48,25 @@
 			formData.append('file', file, file.name);
 			formData.append('title', values.title);
 			formData.append('description', values.description);
-
+			formData.append('collection', values.collection);
 			axios
 				.post(api_endpoint, formData, {
 					headers: formData.getHeaders
 				})
 				.then(function (response) {
 					console.log(response);
-					mint(response.data.hash, response.data.metadata);
+					mint(
+						response.data.hash,
+						response.data.metadata,
+						values.title,
+						values.description,
+						values.price,
+						values.collection
+					);
 				})
 				.catch(function (error) {
 					console.log(error);
 				});
-			// mint
 		} else {
 			console.log('no file uploaded');
 		}
@@ -82,11 +99,14 @@
 								console.log('e.detail.files', e.detail.files);
 								files = e.detail.files;
 								file = files.accepted[0];
-								reader.readAsDataURL(file);
-								reader.onload = (e) => {
-									e.target.result;
-									media = e.target.result;
-								};
+								const reader = new FileReader();
+								if (reader) {
+									reader.readAsDataURL(file);
+									reader.onload = (e) => {
+										e.target.result;
+										media = e.target.result;
+									};
+								}
 							}}
 						>
 							<div
@@ -152,6 +172,42 @@
 					</div>
 					<p class="mt-2 text-sm text-gray-500" />
 				</div>
+				<div class="grid grid-cols-3 gap-6">
+					<div class="col-span-3 sm:col-span-2">
+						<label for="price" class="block text-sm font-medium text-gray-700"> Price* </label>
+						<div class="mt-1 flex flex-row rounded-md shadow-sm">
+							<input
+								type="number"
+								name="price"
+								id="title"
+								class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
+								placeholder="Item price"
+							/>
+							<span
+								class="flex items-center bg-grey-lighter rounded rounded-l-none px-3 text-grey-darker"
+							>
+								ETH
+							</span>
+						</div>
+					</div>
+				</div>
+				<div class="col-span-6 sm:col-span-3">
+					<label for="collection" class="block text-sm font-medium text-gray-700">Collection</label>
+					<select
+						id="collection"
+						name="collection"
+						class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+					>
+						{#if $selectedAccountCollections && $selectedAccountCollections.length > 0}
+							{#each $selectedAccountCollections as selectedAccountCollection, i}
+								<option value={selectedAccountCollection.collectionAddress}>
+									{selectedAccountCollection.collectionName} -
+									{selectedAccountCollection.collectionSymbol || ''}
+								</option>
+							{/each}
+						{/if}
+					</select>
+				</div>
 			</div>
 		</div>
 	</Form>
@@ -162,9 +218,49 @@
 		>
 			Send
 		</button>
+	</div>
+</div>
+<div class="mt-5 md:mt-0 md:col-span-2">
+	<Form bind:values>
+		<div class="shadow sm:rounded-md sm:overflow-hidden">
+			<div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+				<div class="grid grid-cols-3 gap-6">
+					<div class="col-span-3 sm:col-span-2">
+						<label for="collectionName" class="block text-sm font-medium text-gray-700">
+							Collection Name*
+						</label>
+						<div class="mt-1 flex rounded-md shadow-sm">
+							<input
+								type="text"
+								name="collectionName"
+								id="collectionName"
+								class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
+								placeholder="Ex: myTokenName"
+							/>
+						</div>
+					</div>
+					<div class="col-span-3 sm:col-span-2">
+						<label for="collectionSymbol" class="block text-sm font-medium text-gray-700">
+							Collection Token Symbol*
+						</label>
+						<div class="mt-1 flex rounded-md shadow-sm">
+							<input
+								type="text"
+								name="collectionSymbol"
+								id="collectionSymbol"
+								class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
+								placeholder="Ex: ETH"
+							/>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</Form>
+	<div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
 		<button
 			class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-			on:click={createCollection}
+			on:click={handleCreateCollection}
 		>
 			createCollection
 		</button>

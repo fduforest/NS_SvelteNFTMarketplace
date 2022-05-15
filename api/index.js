@@ -9,7 +9,6 @@ const fs = require("fs")
 const readableStreamForFile = null
 const path = require("path")
 const PORT = process.env.PORT || 3005
-const multer = require("multer")
 const formidable = require("formidable")
 const ipfsGateway =
   "https://gateway.pinata.cloud/ipfs/" || "https://ipfs.io/ipfs/"
