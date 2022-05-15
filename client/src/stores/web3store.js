@@ -1,30 +1,21 @@
-import { onMount } from 'svelte';
-import { writable, get } from 'svelte/store';
-import {
-	defaultEvmStores,
-	makeContractStore,
-	connected,
-	web3,
-	selectedAccount,
-	chainId,
-	chainData
-} from 'svelte-web3';
-import NFTmarketplace from '../../../build/contracts/NFTmarketplace.json';
+import { writable } from 'svelte/store';
+// import {
+// 	defaultEvmStores,
+// 	makeContractStore,
+// 	connected,
+// 	web3,
+// 	selectedAccount,
+// 	chainId,
+// 	chainData
+// } from 'svelte-web3';
+//import NFTmarketplace from '../../../build/contracts/NFTmarketplace.json';
 import NFTCollectionFactory from '../../../build/contracts/NFTCollectionFactory.json';
-import NFTCollection from '../../../build/contracts/NFTCollectionFactory.json';
+import NFTCollection from '../../../build/contracts/NFTCollection.json';
 
 const networkId = null;
 let NFTCollectionFactoryContract = null;
 export let selectedAccountCollections = writable([]);
-// export const selectedAccountCollections = writable([]);
 
-//const contract = null;
-//export const contract = writable(selectedAccountCollections);
-
-//getContract(async () => {});
-/**
- *
- */
 export const getSelectedAccountCollections = async () => {
 	console.log('getCollections');
 	let web3 = null;
@@ -106,7 +97,7 @@ getSelectedAccountCollections();
 // });
 
 export const mint = async (hash, metadata, title, description, price, NFTCollectionAddress) => {
-	let web3 = null;
+	let web3;
 	let networkId = null;
 	let deployedNetwork = null;
 	let contract = null;
@@ -119,22 +110,11 @@ export const mint = async (hash, metadata, title, description, price, NFTCollect
 	console.log('NFTCollectionAddress', NFTCollectionAddress);
 	try {
 		web3 = new Web3(window.ethereum);
-		networkId = await web3.eth.net.getId();
-		deployedNetwork = await NFTCollection.networks[networkId];
-		console.log('MintDeployedNetwork', deployedNetwork);
-		const factoryDeployedNetwork = await NFTCollectionFactory.networks[networkId];
-		const factoryContract = await new web3.eth.Contract(
-			NFTCollectionFactory.abi,
-			factoryDeployedNetwork && factoryDeployedNetwork.address
-		);
-		console.log('factoryDeployedNetwork', factoryDeployedNetwork);
-		if (deployedNetwork) {
-			contract = await new web3.eth.Contract(NFTCollection.abi, NFTCollectionAddress);
-			console.log('NFTCollectioncontract', contract);
+		contract = await new web3.eth.Contract(NFTCollection.abi, NFTCollectionAddress);
+		if (contract) {
 			const accounts = await web3.eth.getAccounts();
 			account = accounts[0];
 			console.log('account', account);
-			console.log('MintdeployedNetwork.address', deployedNetwork.address);
 			let res = await contract.methods
 				.mint(metadata, hash, title, description, price)
 				.send({ from: account });

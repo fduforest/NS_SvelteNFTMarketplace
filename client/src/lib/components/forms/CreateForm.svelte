@@ -1,36 +1,23 @@
 <script>
 	import axios from 'axios';
 	import * as yup from 'yup';
-	import FileDrop from 'filedrop-svelte';
+	//import FileDrop from 'filedrop-svelte';
 	import fileSize from 'filesize';
 	import { filedrop } from 'filedrop-svelte';
 	let options = {};
 	import Form from '@svelteschool/svelte-forms';
 	import FormData from 'form-data';
-	import { onMount } from 'svelte';
-	import { browser } from '$app/env';
-	import NFTmarketplace from '../../../../../build/contracts/NFTmarketplace';
-	import { connected, web3, selectedAccount, chainId, chainData } from 'svelte-web3';
+	//import { onMount } from 'svelte';
+	//import { browser } from '$app/env';
+	//import NFTmarketplace from '../../../../../build/contracts/NFTmarketplace';
+	//import { connected, web3, selectedAccount, chainId, chainData } from 'svelte-web3';
 	import { mint, createCollection, selectedAccountCollections } from '../../../stores/web3store.js';
-	//import uploadToIPFS from '../../utils/pinata';
 	let values;
 	let files;
 	let file;
 	let media;
-	//let reader;
-	//let selectedAccountCollections = [];
 
 	const api_endpoint = 'http://127.0.0.1:3005/upload';
-	// onMount(() => {
-	// 	const reader = new FileReader();
-	// 	//events = getSelectedAccountCollections();
-	// });
-
-	// if (typeof window !== 'undefined') {
-	// 	reader = new FileReader();
-	// }
-	//const reader = new FileReader();
-	// console.log(account);
 
 	async function handleCreateCollection(e) {
 		console.log('values.collectionName', values.collectionName);

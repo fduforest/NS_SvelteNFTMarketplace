@@ -1,6 +1,6 @@
 <script context="module">
 	import { browser, dev } from '$app/env';
-	import Premint from '../lib/components/forms/Premint.svelte';
+	import Premint from '../lib/components/forms/CreateForm.svelte';
 </script>
 
 <svelte:head>
@@ -8,8 +8,8 @@
 </svelte:head>
 
 <div class="content">
-	<h1>Premint</h1>
-	<Premint />
+	<h1>Create</h1>
+	<CreateForm />
 </div>
 
 <style>
